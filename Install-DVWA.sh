@@ -122,9 +122,10 @@ sql_commands() {
 # Installer startup
 
 # Update repositories
-update_message=$( "\e[96mUpdating repositories...\e[0m")
+update_message="\e[96mUpdating repositories...\e[0m"
 echo -e "$update_message"
 apt update
+
 
 # Check if the dependencies are installed
 dependencies_message=$( "\e[96mVerifying and installing necessary dependencies...\e[0m")
