@@ -119,17 +119,17 @@ sql_commands() {
     echo 0
 }
 
-# Installer startup
-
-# Update repositories
+# Updating Repo
 update_message="\e[96mUpdating repositories...\e[0m"
 echo -e "$update_message"
 apt update
 
 
+
 # Check if the dependencies are installed
-dependencies_message=$( "\e[96mVerifying and installing necessary dependencies...\e[0m")
+dependencies_message="\e[96mVerifying and installing necessary dependencies...\e[0m"
 echo -e "$dependencies_message"
+
 
 check_program apache2
 check_program mariadb-server
