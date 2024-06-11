@@ -136,25 +136,22 @@ if [ -d "/var/www/html/DVWA" ]; then
     read -p $'\033[96mDo you want to delete the existing folder and download it again (y/n):\033[0m ' user_response
 
     if [[ "$user_response" == "y" ]]; then
-        # Delete existing folder
-        rm -rf /var/www/html/DVWA
+        rm -rf /var/www/html/DVWA >> install_log.txt 2>&1
 
         # Download DVWA from GitHub
         echo -e "\033[96mDownloading DVWA from GitHub...\033[0m"
-        git clone https://github.com/digininja/DVWA.git /var/www/html/DVWA
+        git clone https://github.com/digininja/DVWA.git /var/www/html/DVWA >> install_log.txt 2>&1
         sleep 2
     elif [ "$user_response" == "n" ]; then
-        # User chooses not to download
         echo -e "\033[96mContinuing without downloading DVWA.\033[0m"
     else
-        # Invalid answer
         echo -e "\033[91mError! Invalid response. Exiting the script.\033[0m"
         exit 1
     fi
 else
     # Folder does not exist, download DVWA from GitHub
     echo -e "\033[96mDownloading DVWA from GitHub...\033[0m"
-    git clone https://github.com/digininja/DVWA.git /var/www/html/DVWA
+    git clone https://github.com/digininja/DVWA.git /var/www/html/DVWA >> install_log.txt 2>&1
     sleep 2
 fi
 
