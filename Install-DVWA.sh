@@ -59,8 +59,8 @@ run_sql_commands() {
 
     while true; do
         echo -e "\n\e[96mDefault credentials:\e[0m"
-        echo -e "Username: \033[93mroot\033[0m"
-        echo -e "\nPassword: \033[93m[No password, just hit Enter]\033[0m"
+        echo -e "Username: \e[93mroot\e[0m"
+        echo -e "\nPassword: \e[93m[No password, just hit Enter]\e[0m"
         read -p $'\e[96mEnter SQL user:\e[0m ' sql_user
         # The root user is configured as the default user to facilitate unattended installations.
         sql_user=${sql_user:-root}
@@ -75,10 +75,8 @@ run_sql_commands() {
     done
 
     # Execute SQL commands
-    sql_commands_output=$(sql_commands "$sql_user" "$sql_password")
-
-    if [ $? -eq 0 ]; then
-        echo -e "\033[92mSQL commands executed successfully.\033[0m"
+    if sql_commands "$sql_user" "$sql_password"; then
+        echo -e "\e[92mSQL commands executed successfully.\e[0m"
     fi
 }
 
@@ -94,24 +92,25 @@ sql_commands() {
 
     # Check if the database already exists
     if ! $sql_command -e "CREATE DATABASE IF NOT EXISTS dvwa;"; then
-        echo -e "\033[91mAn error occurred while creating the DVWA database.\033[0m"
+        echo -e "\e[91mAn error occurred while creating the DVWA database.\e[0m"
         return 1
     fi
 
     # Check if the user already exists
     if ! $sql_command -e "CREATE USER IF NOT EXISTS 'dvwa'@'localhost' IDENTIFIED BY 'p@ssw0rd';"; then
-        echo -e "\033[91mAn error occurred while creating the DVWA user.\033[0m"
+        echo -e "\e[91mAn error occurred while creating the DVWA user.\e[0m"
         return 1
     fi
 
     # Assign privileges to the user
     if ! $sql_command -e "GRANT ALL PRIVILEGES ON dvwa.* TO 'dvwa'@'localhost'; FLUSH PRIVILEGES;"; then
-        echo -e "\033[91mAn error occurred while granting privileges.\033[0m"
+        echo -e "\e[91mAn error occurred while granting privileges.\e[0m"
         return 1
     fi
 
-    echo 0
+    return 0
 }
+
 
 # Updating repositories
 echo -e "\033[96mUpdating repositories...\033[0m"
