@@ -133,9 +133,6 @@ check_program git
 
 # Checking if the folder already exists
 if [ -d "/var/www/html/DVWA" ]; then
-    # The folder already exists
-    echo -e "\033[91mAttention! The DVWA folder is already created.\033[0m"
-
     # Ask the user what action to take
     read -p "\033[96mDo you want to delete the existing folder and download it again (y/n):\033[0m " user_response
 
@@ -161,6 +158,7 @@ else
     git clone https://github.com/digininja/DVWA.git /var/www/html/DVWA
     sleep 2
 fi
+
 
 # Check if MariaDB is already enabled
 if systemctl is-enabled mariadb.service &>/dev/null; then
