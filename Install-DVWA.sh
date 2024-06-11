@@ -276,5 +276,5 @@ echo -e "Password: \033[93mpassword\033[0m"
 
 #  End of installer
 echo
-final_message=$( "\033[95mWith ♡ by its-ashu-otf")
+final_message=$( "With ♡ by its-ashu-otf")
 echo -e "$final_message"
