@@ -273,3 +273,6 @@ credentials_after_setup_message=$( "\e[92mCredentials:\e[0m")
 echo -e "$credentials_after_setup_message"
 echo -e "Username: \033[93madmin\033[0m"
 echo -e "Password: \033[93mpassword\033[0m"
+
+final_message=$( "\033[95mWith ♡ by its-ashu-otf")
+echo -e "$final_message"
