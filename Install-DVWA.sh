@@ -43,11 +43,11 @@ echo
 # Function to verify the existence of a program
 check_program() {
     if ! dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q "install ok installed"; then
-        message=$("\033[91m$1 is not installed. Installing it now...\e[0m")
+        message="\033[91m$1 is not installed. Installing it now...\e[0m"
         echo -e >&2 "$message"
         apt install -y "$1"
     else
-        success_message=$( "\033[92m$1 is installed!\033[0m" ")
+        success_message="\033[92m$1 is installed!\033[0m"
         echo -e "$success_message"
     fi
 }
