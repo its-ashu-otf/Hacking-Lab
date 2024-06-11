@@ -61,10 +61,10 @@ run_sql_commands() {
         echo -e "\n\e[96mDefault credentials:\e[0m"
         echo -e "Username: \033[93mroot\033[0m"
         echo -e "\nPassword: \033[93m[No password, just hit Enter]\033[0m"
-        read -p "$( "\e[96mEnter SQL user:\e[0m " )" sql_user
+        read -p $'\e[96mEnter SQL user:\e[0m ' sql_user
         # The root user is configured as the default user to facilitate unattended installations.
         sql_user=${sql_user:-root}
-        read -s -p "$( "\e[96mEnter SQL password (press Enter for no password):\e[96m ")" sql_password
+        read -s -p $'\e[96mEnter SQL password (press Enter for no password):\e[0m ' sql_password
         echo
         # Verify if credentials are valid before executing SQL commands
         if ! mysql -u "$sql_user" -p"$sql_password" -e ";" &>/dev/null; then
