@@ -57,9 +57,9 @@ run_sql_commands() {
     local sql_password
 
     while true; do
-        echo -e "\n$( "\e[96mDefault credentials:\e[0m")"
+        echo -e "\n\e[96mDefault credentials:\e[0m"
         echo -e "Username: \033[93mroot\033[0m"
-        echo -e "\n$( "Password: \033[93m[No password just hit Enter]\033[0m")"
+        echo -e "\nPassword: \033[93m[No password just hit Enter]\033[0m"
         read -p "$( "\e[96mEnter SQL user:\e[0m " )" sql_user
         # The root user is configured as the default user to facilitate unattended installations.
         sql_user=${sql_user:-root}
@@ -274,7 +274,7 @@ echo -e "$credentials_after_setup_message"
 echo -e "Username: \033[93madmin\033[0m"
 echo -e "Password: \033[93mpassword\033[0m"
 
-final_message=$(get_language_message "\033[95mWith ♡ by IamCarron" "\033[95mCon ♡ by IamCarron")
+final_message="\033[95m Made with ♡ by its-ashu-otf"
 echo -e "$final_message"
 
 
