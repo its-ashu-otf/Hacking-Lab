@@ -1,10 +1,58 @@
 #!/bin/bash
 
+checkEnv() {
+    ## Check for requirements.
+    REQUIREMENTS='curl groups sudo'
+    if ! command_exists ${REQUIREMENTS}; then
+        echo -e "${RED}To run me, you need: ${REQUIREMENTS}${RC}"
+        exit 1
+    fi
+
+    ## Check Package Handeler
+    PACKAGEMANAGER='apt yum dnf pacman zypper'
+    for pgm in ${PACKAGEMANAGER}; do
+        if command_exists ${pgm}; then
+            PACKAGER=${pgm}
+            echo -e "Using ${pgm}"
+        fi
+    done
+
+    if [ -z "${PACKAGER}" ]; then
+        echo -e "${RED}Can't find a supported package manager"
+        exit 1
+    fi
+
+    ## Check if the current directory is writable.
+    GITPATH="$(dirname "$(realpath "$0")")"
+    if [[ ! -w ${GITPATH} ]]; then
+        echo -e "${RED}Can't write to ${GITPATH}${RC}"
+        exit 1
+    fi
+
+    ## Check SuperUser Group
+    SUPERUSERGROUP='wheel sudo root'
+    for sug in ${SUPERUSERGROUP}; do
+        if groups | grep ${sug}; then
+            SUGROUP=${sug}
+            echo -e "Super user group ${SUGROUP}"
+        fi
+    done
+
+    ## Check if member of the sudo group.
+    if ! groups | grep ${SUGROUP} >/dev/null; then
+        echo -e "${RED}You need to be a member of the sudo group to run me!"
+        exit 1
+    fi
+
+}
+
 cd /var/www/html
 
 echo "Fetching Latest bWAPP from the Repo..."
 wget -q --show-progress https://github.com/its-ashu-otf/Hacking-Lab/raw/main/bWAPP_latest.zip
 
+unzip -o bWAPP_latest.zip
+rm bWAPP_latest.zip
 # Function to run SQL commands
 run_sql_commands() {
     local sql_user
@@ -44,19 +92,19 @@ sql_commands() {
     fi
 
     # Check if the database already exists
-    if ! $sql_command -e "CREATE DATABASE IF NOT EXISTS dvwa;"; then
+    if ! $sql_command -e "CREATE DATABASE IF NOT EXISTS bWAPP;"; then
         echo -e "\e[91mAn error occurred while creating the DVWA database.\e[0m"
         return 1
     fi
 
     # Check if the user already exists
-    if ! $sql_command -e "CREATE USER IF NOT EXISTS 'dvwa'@'localhost' IDENTIFIED BY 'p@ssw0rd';"; then
+    if ! $sql_command -e "CREATE USER IF NOT EXISTS 'bWAPP'@'localhost' IDENTIFIED BY 'p@ssw0rd';"; then
         echo -e "\e[91mAn error occurred while creating the DVWA user.\e[0m"
         return 1
     fi
 
     # Assign privileges to the user
-    if ! $sql_command -e "GRANT ALL PRIVILEGES ON dvwa.* TO 'dvwa'@'localhost'; FLUSH PRIVILEGES;"; then
+    if ! $sql_command -e "GRANT ALL PRIVILEGES ON dvwa.* TO 'bWAPP'@'localhost'; FLUSH PRIVILEGES;"; then
         echo -e "\e[91mAn error occurred while granting privileges.\e[0m"
         return 1
     fi
@@ -80,33 +128,6 @@ check_program php-mysql
 check_program php-gd
 check_program libapache2-mod-php
 check_program git
-
-# Downloading DVWA repository from GitHub
-
-# Checking if the folder already exists
-if [ -d "/var/www/html/DVWA" ]; then
-    # Ask the user what action to take
-    read -p $'\033[96mDo you want to delete the existing folder and download it again (y/n):\033[0m ' user_response
-
-    if [[ "$user_response" == "y" ]]; then
-        rm -rf /var/www/html/DVWA >> install_log.txt 2>&1
-
-        # Download DVWA from GitHub
-        echo -e "\033[96mDownloading DVWA from GitHub...\033[0m"
-        git clone https://github.com/digininja/DVWA.git /var/www/html/DVWA >> install_log.txt 2>&1
-        sleep 2
-    elif [ "$user_response" == "n" ]; then
-        echo -e "\033[96mContinuing without downloading DVWA.\033[0m"
-    else
-        echo -e "\033[91mError! Invalid response. Exiting the script.\033[0m"
-        exit 1
-    fi
-else
-    # Folder does not exist, download DVWA from GitHub
-    echo -e "\033[96mDownloading DVWA from GitHub...\033[0m"
-    git clone https://github.com/digininja/DVWA.git /var/www/html/DVWA >> install_log.txt 2>&1
-    sleep 2
-fi
 
 
 # Check if MariaDB is already enabled
@@ -132,3 +153,33 @@ fi
 # Call the function to run SQL commands
 run_sql_commands
 sleep 2
+
+
+# Check if Apache is already enabled
+if systemctl is-enabled apache2 &>/dev/null; then
+    echo -e "\033[92mApache service is already enabled.\033[0m"
+else
+    # Enable Apache
+    echo -e "\033[96mEnabling Apache...\033[0m"
+    systemctl enable apache2 &>/dev/null
+    sleep 2
+fi
+
+# Restart Apache
+echo -e "\033[96mRestarting Apache...\033[0m"
+systemctl restart apache2 &>/dev/null
+sleep 2
+
+# Display success message
+echo -e "\033[92mDVWA has been installed successfully. Access \033[93mhttp://localhost/bWAPP\033[0m \033[92mto get started.\033[0m"
+
+# Show user credentials after configuration
+echo -e "\033[92mCredentials:\033[0m"
+echo -e "Username: \033[93mbee\033[0m"
+echo -e "Password: \033[93mbug\033[0m"
+
+# Final message
+echo -e "\033[95m Made with ♡ by its-ashu-otf\033[0m"
+
+# Function Call
+checkEnv
