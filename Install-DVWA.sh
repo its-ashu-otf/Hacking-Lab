@@ -133,7 +133,7 @@ check_program git
 # Checking if the folder already exists
 if [ -d "/var/www/html/DVWA" ]; then
     # Ask the user what action to take
-    read -p "\033[96mDo you want to delete the existing folder and download it again (y/n):\033[0m " user_response
+    read -p $'\033[96mDo you want to delete the existing folder and download it again (y/n):\033[0m ' user_response
 
     if [[ "$user_response" == "y" ]]; then
         # Delete existing folder
