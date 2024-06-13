@@ -11,3 +11,9 @@ sudo bash -c "$(curl --fail --show-error --silent --location https://raw.githubu
 ```bash
 sudo bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/its-ashu-otf/Hacking-Lab/main/install-bWAPP.sh)"
  ```
+## For Custom ZSH Profile
+
+```bash
+bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/its-ashu-otf/myZSH/main/setup.sh)"
+ ```
+
