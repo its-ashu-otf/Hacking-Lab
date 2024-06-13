@@ -66,13 +66,12 @@ run_sql_commands() {
     
     while true; do
         echo -e "\n\e[96mDefault credentials:\e[0m"
-        echo -e "Username: \e[93muser\e[0m"
-        echo -e "\nPassword: \e[93m[if using default credentials, just hit Enter]\e[0m"
+        echo -e "Username: \e[93mroot\e[0m"
+        echo -e "\nPassword: \e[93m[No password, just hit Enter]\e[0m"
         read -p $'\e[96mEnter SQL user:\e[0m ' sql_user
         # The root user is configured as the default user to facilitate unattended installations.
         sql_user=${sql_user:-user}
-        sql_password=${sql_password:-pass}
-        read -s -p $'\e[96mEnter SQL password (press Enter for default password):\e[0m ' sql_password
+        read -s -p $'\e[96mEnter SQL password (press Enter for no password):\e[0m ' sql_password
         echo
         # Verify if credentials are valid before executing SQL commands
         if ! mysql -u "$sql_user" -p"$sql_password" -e ";" &>/dev/null; then
@@ -99,6 +98,16 @@ sql_commands() {
     fi
 
     # Check if the database already exists
+     if ! $sql_command -e "create user 'user'@'localhost' identified by 'pass';"; then
+        echo -e "\e[91mAn error occurred while creating the user.\e[0m"
+        return 1
+    fi
+
+     if ! $sql_command -e "GRANT ALL PRIVILEGES ON bWAPP. * to 'user'@'localhost' identified by 'pass'; FLUSH PRIVILEGES;"; then
+        echo -e "\e[91mAn error occurred while granting user on the bWAPP database.\e[0m"
+        return 1
+    fi
+    
     if ! $sql_command -e "CREATE DATABASE IF NOT EXISTS bWAPP;"; then
         echo -e "\e[91mAn error occurred while creating the bWAPP database.\e[0m"
         return 1
@@ -110,31 +119,8 @@ sql_commands() {
         return 1
     fi
 
-    # Assign privileges to the user
-    if ! $sql_command -e "GRANT ALL PRIVILEGES ON bWAPP.* TO 'user'@'localhost'; FLUSH PRIVILEGES;"; then
-        echo -e "\e[91mAn error occurred while granting privileges.\e[0m"
-        return 1
-    fi
-
     return 0
 }
-
-
-# Updating repositories
-echo -e "\033[96mUpdating repositories...\033[0m"
-apt update
-
-# Checking and installing necessary dependencies
-echo -e "\033[96mVerifying and installing necessary dependencies...\033[0m"
-
-check_program apache2
-check_program mariadb-server
-check_program mariadb-client
-check_program php
-check_program php-mysql
-check_program php-gd
-check_program libapache2-mod-php
-check_program git
 
 
 # Check if MariaDB is already enabled
