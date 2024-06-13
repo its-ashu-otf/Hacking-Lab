@@ -55,15 +55,9 @@ rm bWAPP.zip
 
 # Function to run SQL commands
 run_sql_commands() {
-    create user
     local sql_user
     local sql_password
 
-    echo -e "Creating a new user by name 'user' "
-    sudo mysql
-    create user 'user'@'localhost' identified by 'pass';
-    exit;
-    
     while true; do
         echo -e "\n\e[96mDefault credentials:\e[0m"
         echo -e "Username: \e[93mroot\e[0m"
