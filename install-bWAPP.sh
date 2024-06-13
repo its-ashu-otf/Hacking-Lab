@@ -50,9 +50,9 @@ cd /var/www/html
 
 echo "Fetching Latest bWAPP from the Repo..."
 wget -q --show-progress https://github.com/its-ashu-otf/Hacking-Lab/raw/main/bWAPP_latest.zip
-
 unzip -o bWAPP_latest.zip
 rm bWAPP_latest.zip
+
 # Function to run SQL commands
 run_sql_commands() {
     local sql_user
@@ -98,13 +98,13 @@ sql_commands() {
     fi
 
     # Check if the user already exists
-    if ! $sql_command -e "CREATE USER IF NOT EXISTS 'bWAPP'@'localhost' IDENTIFIED BY 'p@ssw0rd';"; then
+    if ! $sql_command -e "CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'p@ssw0rd';"; then
         echo -e "\e[91mAn error occurred while creating the DVWA user.\e[0m"
         return 1
     fi
 
     # Assign privileges to the user
-    if ! $sql_command -e "GRANT ALL PRIVILEGES ON dvwa.* TO 'bWAPP'@'localhost'; FLUSH PRIVILEGES;"; then
+    if ! $sql_command -e "GRANT ALL PRIVILEGES ON bWAPP.* TO 'root'@'localhost'; FLUSH PRIVILEGES;"; then
         echo -e "\e[91mAn error occurred while granting privileges.\e[0m"
         return 1
     fi
@@ -171,7 +171,7 @@ systemctl restart apache2 &>/dev/null
 sleep 2
 
 # Display success message
-echo -e "\033[92mDVWA has been installed successfully. Access \033[93mhttp://localhost/bWAPP\033[0m \033[92mto get started.\033[0m"
+echo -e "\033[92mbWAPP has been installed successfully. Access \033[93mhttp://localhost/bWAPP\033[0m \033[92mto get started.\033[0m"
 
 # Show user credentials after configuration
 echo -e "\033[92mCredentials:\033[0m"
