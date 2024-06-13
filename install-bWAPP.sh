@@ -49,7 +49,7 @@ checkEnv() {
 cd /var/www/html
 
 echo "Fetching Latest bWAPP from the Repo..."
-wget -q --show-progress https://github.com/its-ashu-otf/Hacking-Lab/raw/main/bWAPP_latest.zip
+wget -q --show-progress https://raw.githubusercontent.com/its-ashu-otf/Hacking-Lab/main/bWAPP.zip
 unzip -o bWAPP_latest.zip
 rm bWAPP_latest.zip
 
