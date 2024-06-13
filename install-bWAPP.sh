@@ -65,7 +65,6 @@ echo -e "\033[92m╓────────────────────
 center_text "Welcome to the bWAPP setup!" "$line_length"
 center_text "Script Name: Install-bWAPP.sh " "$line_length"
 center_text "Author: its-ashu-otf " "$line_length"
-center_text "Github Repo: https://github.com/its-ashu-otf/Hacking-Lab" "$line_length"
 center_text "Installer Version: 1.0.0 " "$line_length"
 echo -e "╙────────────────────────────────────────────────────────────╜\033[0m"
 echo
@@ -118,15 +117,15 @@ if [ -d "/var/www/html/bWAPP" ]; then
         rm bWAPP.zip
         sleep 2
     elif [ "$user_response" == "n" ]; then
-        echo -e "\033[96mContinuing without downloading DVWA.\033[0m"
+        echo -e "\033[96mContinuing without downloading bWAPP.\033[0m"
     else
         echo -e "\033[91mError! Invalid response. Exiting the script.\033[0m"
         exit 1
     fi
 else
 
-    # Folder does not exist, download DVWA from GitHub
-    echo -e "\033[96mDownloading DVWA from GitHub...\033[0m"
+    # Folder does not exist, download bWAPP from GitHub
+    echo -e "\033[96mDownloading bWAPP from GitHub...\033[0m"
     cd /var/www/html
     wget -q --show-progress https://raw.githubusercontent.com/its-ashu-otf/Hacking-Lab/main/bWAPP.zip >> install_log.txt 2>&1
     unzip -o bWAPP.zip
@@ -134,7 +133,7 @@ else
     sleep 2
 fi
 
-# Assign appropriate permissions to DVWA
+# Assign appropriate permissions to bWAPP
 echo -e "\033[96mConfiguring permissions...\033[0m"
 chown -R www-data:www-data /var/www/html/bWAPP
 chmod -R 755 /var/www/html/bWAPP
