@@ -91,8 +91,9 @@ sql_commands() {
         sql_command+=" -p$sql_password"
     fi
 
+
     # Check if the database already exists
-     if ! $sql_command -e "create user 'user'@'localhost' identified by 'pass';"; then
+     if ! $sql_command -e "CREATE USER 'user'@'localhost' IDENTIFIED BY 'pass';"; then
         echo -e "\e[91mAn error occurred while creating the user.\e[0m"
         return 1
     fi
