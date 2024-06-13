@@ -1,5 +1,11 @@
 # Hacking Lab
 
+## Basic fixes and miscs
+
+```bash
+sudo bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/its-ashu-otf/Hacking-Lab/main/basic-setup.sh)"
+ ```
+
 ## For Setting Up DVWA
 
 ```bash
