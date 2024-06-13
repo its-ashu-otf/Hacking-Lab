@@ -55,17 +55,24 @@ rm bWAPP.zip
 
 # Function to run SQL commands
 run_sql_commands() {
+    create user
     local sql_user
     local sql_password
 
+    echo -e "Creating a new user by name 'user' "
+    sudo mysql
+    create user 'user'@'localhost' identified by 'pass';
+    exit;
+    
     while true; do
         echo -e "\n\e[96mDefault credentials:\e[0m"
-        echo -e "Username: \e[93mroot\e[0m"
-        echo -e "\nPassword: \e[93m[No password, just hit Enter]\e[0m"
+        echo -e "Username: \e[93muser\e[0m"
+        echo -e "\nPassword: \e[93m[if using default credentials, just hit Enter]\e[0m"
         read -p $'\e[96mEnter SQL user:\e[0m ' sql_user
         # The root user is configured as the default user to facilitate unattended installations.
-        sql_user=${sql_user:-root}
-        read -s -p $'\e[96mEnter SQL password (press Enter for no password):\e[0m ' sql_password
+        sql_user=${sql_user:-user}
+        sql_password=${sql_password:-pass}
+        read -s -p $'\e[96mEnter SQL password (press Enter for default password):\e[0m ' sql_password
         echo
         # Verify if credentials are valid before executing SQL commands
         if ! mysql -u "$sql_user" -p"$sql_password" -e ";" &>/dev/null; then
@@ -93,18 +100,18 @@ sql_commands() {
 
     # Check if the database already exists
     if ! $sql_command -e "CREATE DATABASE IF NOT EXISTS bWAPP;"; then
-        echo -e "\e[91mAn error occurred while creating the DVWA database.\e[0m"
+        echo -e "\e[91mAn error occurred while creating the bWAPP database.\e[0m"
         return 1
     fi
 
     # Check if the user already exists
-    if ! $sql_command -e "CREATE USER IF NOT EXISTS 'root'@'localhost' IDENTIFIED BY 'p@ssw0rd';"; then
-        echo -e "\e[91mAn error occurred while creating the DVWA user.\e[0m"
+    if ! $sql_command -e "CREATE USER IF NOT EXISTS 'user'@'localhost' IDENTIFIED BY 'pass';"; then
+        echo -e "\e[91mAn error occurred while creating the bWAPP user.\e[0m"
         return 1
     fi
 
     # Assign privileges to the user
-    if ! $sql_command -e "GRANT ALL PRIVILEGES ON bWAPP.* TO 'root'@'localhost'; FLUSH PRIVILEGES;"; then
+    if ! $sql_command -e "GRANT ALL PRIVILEGES ON bWAPP.* TO 'user'@'localhost'; FLUSH PRIVILEGES;"; then
         echo -e "\e[91mAn error occurred while granting privileges.\e[0m"
         return 1
     fi
