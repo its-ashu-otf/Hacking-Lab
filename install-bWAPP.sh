@@ -1,27 +1,6 @@
 #!/bin/bash
 
 checkEnv() {
-    ## Check for requirements.
-    REQUIREMENTS='curl groups sudo'
-    if ! command_exists ${REQUIREMENTS}; then
-        echo -e "${RED}To run me, you need: ${REQUIREMENTS}${RC}"
-        exit 1
-    fi
-
-    ## Check Package Handeler
-    PACKAGEMANAGER='apt yum dnf pacman zypper'
-    for pgm in ${PACKAGEMANAGER}; do
-        if command_exists ${pgm}; then
-            PACKAGER=${pgm}
-            echo -e "Using ${pgm}"
-        fi
-    done
-
-    if [ -z "${PACKAGER}" ]; then
-        echo -e "${RED}Can't find a supported package manager"
-        exit 1
-    fi
-
     ## Check if the current directory is writable.
     GITPATH="$(dirname "$(realpath "$0")")"
     if [[ ! -w ${GITPATH} ]]; then
@@ -44,14 +23,122 @@ checkEnv() {
         exit 1
     fi
 
+    # check for sudo privileges
+    if [ "$EUID" -ne 0 ]; then
+        error_message=$(get_language_message "\e[91mThis script must be run by the root user.\e[0m" "\e[91mEste script debe ejecutarse como usuario root.\e[0m")
+        echo -e "$error_message"
+        exit 1
+    fi
 }
 
-cd /var/www/html
+# Function to center text
+center_text() {
+    local text="$1"
+    local line_length="$2"
+    local text_length=${#text}
+    local padding_before=$(( (line_length - text_length) / 2 ))
+    local padding_after=$(( line_length - text_length - padding_before ))
+    
+    printf "%s%-${padding_before}s%s%-*s%s\n" "║" " " "$text" "$padding_after" " " "║"
+}
 
-echo "Fetching Latest bWAPP from the Repo..."
-wget -q --show-progress https://raw.githubusercontent.com/its-ashu-otf/Hacking-Lab/main/bWAPP.zip
-unzip -o bWAPP.zip
-rm bWAPP.zip
+# ASCII Art
+echo -e "\033[96m\033[1m
+
+                ██████╗ ██╗    ██╗ █████╗ ██████╗ ██████╗             
+                ██╔══██╗██║    ██║██╔══██╗██╔══██╗██╔══██╗            
+                ██████╔╝██║ █╗ ██║███████║██████╔╝██████╔╝            
+                ██╔══██╗██║███╗██║██╔══██║██╔═══╝ ██╔═══╝             
+                ██████╔╝╚███╔███╔╝██║  ██║██║     ██║                 
+                ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝     ╚═╝                 
+                                                                      
+██╗███╗   ██╗███████╗████████╗ █████╗ ██╗     ██╗     ███████╗██████╗ 
+██║████╗  ██║██╔════╝╚══██╔══╝██╔══██╗██║     ██║     ██╔════╝██╔══██╗
+██║██╔██╗ ██║███████╗   ██║   ███████║██║     ██║     █████╗  ██████╔╝
+██║██║╚██╗██║╚════██║   ██║   ██╔══██║██║     ██║     ██╔══╝  ██╔══██╗
+██║██║ ╚████║███████║   ██║   ██║  ██║███████╗███████╗███████╗██║  ██║
+╚═╝╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝
+                                                                      
+\033[0m"
+echo
+echo -e "\033[92m╓────────────────────────────────────────────────────────────╖"
+center_text "Welcome to the bWAPP setup!" "$line_length"
+center_text "Script Name: Install-bWAPP.sh " "$line_length"
+center_text "Author: its-ashu-otf " "$line_length"
+center_text "Github Repo: https://github.com/its-ashu-otf/Hacking-Lab" "$line_length"
+center_text "Installer Version: 1.0.0 " "$line_length"
+echo -e "╙────────────────────────────────────────────────────────────╜\033[0m"
+echo
+
+
+# Updating repositories
+echo -e "\033[96mUpdating repositories...\033[0m"
+apt update
+
+# Function to verify the existence of a program
+check_program() {
+    if ! dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q "install ok installed"; then
+        message="\033[91m$1 is not installed. Installing it now...\033[0m"
+        echo -e >&2 "$message"
+        apt install -y "$1"
+    else
+        success_message="\033[92m$1 is installed!\033[0m"
+        echo -e "$success_message"
+    fi
+}
+
+# Checking and installing necessary dependencies
+echo -e "\033[96mVerifying and installing necessary dependencies...\033[0m"
+
+check_program apache2
+check_program mariadb-server
+check_program mariadb-client
+check_program php
+check_program php-mysql
+check_program php-gd
+check_program libapache2-mod-php
+check_program git
+
+
+# Downloading bWAPP repository from GitHub
+
+# Checking if the folder already exists
+if [ -d "/var/www/html/bWAPP" ]; then
+    # Ask the user what action to take
+    read -p $'\033[96mDo you want to delete the existing folder and download it again (y/n):\033[0m ' user_response
+
+    if [[ "$user_response" == "y" ]]; then
+        rm -rf /var/www/html/bWAPP >> install_log.txt 2>&1
+
+        # Download bWAPP from GitHub
+        echo -e "\033[96mDownloading bWAPP from GitHub...\033[0m"
+        cd /var/www/html
+        wget -q --show-progress https://raw.githubusercontent.com/its-ashu-otf/Hacking-Lab/main/bWAPP.zip
+        unzip -o bWAPP.zip
+        rm bWAPP.zip
+        sleep 2
+    elif [ "$user_response" == "n" ]; then
+        echo -e "\033[96mContinuing without downloading DVWA.\033[0m"
+    else
+        echo -e "\033[91mError! Invalid response. Exiting the script.\033[0m"
+        exit 1
+    fi
+else
+
+    # Folder does not exist, download DVWA from GitHub
+    echo -e "\033[96mDownloading DVWA from GitHub...\033[0m"
+    cd /var/www/html
+    wget -q --show-progress https://raw.githubusercontent.com/its-ashu-otf/Hacking-Lab/main/bWAPP.zip >> install_log.txt 2>&1
+    unzip -o bWAPP.zip
+    rm bWAPP.zip
+    sleep 2
+fi
+
+# Assign appropriate permissions to DVWA
+echo -e "\033[96mConfiguring permissions...\033[0m"
+chown -R www-data:www-data /var/www/html/bWAPP
+chmod -R 755 /var/www/html/bWAPP
+sleep 2
 
 # Function to run SQL commands
 run_sql_commands() {
@@ -93,10 +180,12 @@ sql_commands() {
 
 
     # Check if the database already exists
-     if ! $sql_command -e "CREATE USER 'user'@'localhost' IDENTIFIED BY 'pass';"; then
-        echo -e "\e[91mAn error occurred while creating the user.\e[0m"
+ # Check if the user already exists
+    if ! $sql_command -e "CREATE USER IF NOT EXISTS 'user'@'localhost' IDENTIFIED BY 'pass';"; then
+        echo -e "\e[91mAn error occurred while creating the bWAPP user.\e[0m"
         return 1
     fi
+
 
      if ! $sql_command -e "GRANT ALL PRIVILEGES ON bWAPP. * to 'user'@'localhost' identified by 'pass'; FLUSH PRIVILEGES;"; then
         echo -e "\e[91mAn error occurred while granting user on the bWAPP database.\e[0m"
@@ -108,11 +197,6 @@ sql_commands() {
         return 1
     fi
 
-    # Check if the user already exists
-    if ! $sql_command -e "CREATE USER IF NOT EXISTS 'user'@'localhost' IDENTIFIED BY 'pass';"; then
-        echo -e "\e[91mAn error occurred while creating the bWAPP user.\e[0m"
-        return 1
-    fi
 
     return 0
 }
@@ -159,7 +243,7 @@ systemctl restart apache2 &>/dev/null
 sleep 2
 
 # Display success message
-echo -e "\033[92mbWAPP has been installed successfully. Access \033[93mhttp://localhost/bWAPP\033[0m \033[92mto get started.\033[0m"
+echo -e "\033[92mbWAPP has been installed successfully. Access \033[93mhttp://localhost/bWAPP/install.php\033[0m \033[92mto get started.\033[0m"
 
 # Show user credentials after configuration
 echo -e "\033[92mCredentials:\033[0m"
