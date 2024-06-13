@@ -50,8 +50,8 @@ cd /var/www/html
 
 echo "Fetching Latest bWAPP from the Repo..."
 wget -q --show-progress https://raw.githubusercontent.com/its-ashu-otf/Hacking-Lab/main/bWAPP.zip
-unzip -o bWAPP_latest.zip
-rm bWAPP_latest.zip
+unzip -o bWAPP.zip
+rm bWAPP.zip
 
 # Function to run SQL commands
 run_sql_commands() {
