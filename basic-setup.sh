@@ -22,6 +22,11 @@ sudo apt update && sudo apt install floorp -y
 echo "Installing Terminator"
 sudo apt-get update && sudo apt-get install terminator -y 
 
+echo "Adding Clipboard Manager Like Windows & Setting up the Shortkey with Windows key + v"
+wget -q --show-progress https://raw.githubusercontent.com/its-ashu-otf/Fix-my-Kali/main/add-clipman.sh
+bash ./add-clipman.sh
+rm add-clipman.sh
+
 echo "Fixing Numlock..."
 wget -q --show-progress https://raw.githubusercontent.com/its-ashu-otf/Fix-my-Kali/main/numlockfix.sh
 chmod +x numlockfix.sh
