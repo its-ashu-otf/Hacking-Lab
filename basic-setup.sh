@@ -19,6 +19,9 @@ curl -fsSL https://ppa.ablaze.one/KEY.gpg | sudo gpg --dearmor -o /usr/share/key
 sudo curl -sS --compressed -o /etc/apt/sources.list.d/Floorp.list 'https://ppa.ablaze.one/Floorp.list'
 sudo apt update && sudo apt install floorp -y
 
+echo "Installing Terminator"
+sudo apt-get update && sudo apt-get install terminator -y 
+
 echo "Fixing Numlock..."
 wget -q --show-progress https://raw.githubusercontent.com/its-ashu-otf/Fix-my-Kali/main/numlockfix.sh
 chmod +x numlockfix.sh
