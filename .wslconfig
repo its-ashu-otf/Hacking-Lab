@@ -1,0 +1,5 @@
+[wsl2]
+
+networkingMode=mirrored
+
+kernel=C:\\bzImage
