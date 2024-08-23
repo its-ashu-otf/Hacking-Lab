@@ -165,6 +165,8 @@ install_stable_diffusion() {
 }
 
 # Function Calls
+checkEnv
+center_text
 check_program
 install_ollama
 install_docker
