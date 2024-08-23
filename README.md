@@ -15,7 +15,7 @@ sudo bash -c "$(curl --fail --show-error --silent --location https://raw.githubu
 ## For Installing and Setting UP Ollama with llama3.1 and Stable Diffusion for Image Generation 
 
 ```bash
-sudo bash -c "$(curl --fail -show-error --silent --location https://raw.githubusercontent.com/its-ashu-otf/Hacking-Lab/main/ollama-wsl-setup.sh)"
+sudo bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/its-ashu-otf/Hacking-Lab/main/ollama-wsl-setup.sh)"
 ```
 
 ## For Setting Up bWAPP
