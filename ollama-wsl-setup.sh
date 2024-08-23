@@ -131,7 +131,7 @@ install_docker() {
     
     # Installing Docker
     echo -e "\033[96mInstalling Docker...\033[0m"
-    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
     # Installing OPENUI Web Docker
     echo -e "\033[96mInstalling Open WebUI Docker Container now....\033[0m"
@@ -145,7 +145,7 @@ install_stable_diffusion() {
     echo -e "\033[96mChecking for PreRequisites....\033[0m"
     sudo apt install -y make build-essential libssl-dev zlib1g-dev \
     libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
-    libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev git
+    libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev git 
 
     echo -e "\033[96mInstalling PyENV....\033[0m"
     curl https://pyenv.run | bash
