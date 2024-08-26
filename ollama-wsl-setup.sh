@@ -90,15 +90,6 @@ check_program() {
 echo -e "\033[96mVerifying and installing necessary dependencies...\033[0m"
 
 check_program ollama
-check_program docker-ce 
-check_program docker-ce-cli 
-check_program containerd.io 
-check_program docker-buildx-plugin 
-check_program docker-compose-plugin
-check_program pyenv
-check_program make build-essential libssl-dev zlib1g-dev \
-libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev \
-libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev git
 
 # Installing Ollama
 
@@ -161,7 +152,7 @@ install_stable_diffusion() {
     chmod +x webui.sh
 
     # Display success message
-    echo -e "\033[92m Ollama has been installed successfully with llama3.1 LLM and OpenWebUI. Access OpenWEBUI\033[93mhttp://localhost:8080/\033[0m \033[92mto get started.\033[0m"
+    echo -e "\033[92m Ollama has been installed successfully with llama3.1 LLM and OpenWebUI. Access OpenWEBUI on \033[93mhttp://localhost:8080/\033[0m \033[92mto get started.\033[0m"
 }
 
 # Function Calls
