@@ -1,101 +1,116 @@
 #!/bin/sh
 
+# Color Codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+RC='\033[0m'
+
+# Function to check if command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Function to handle errors
+handle_error() {
+    echo -e "${RED}Error: $1${RC}"
+    exit 1
+}
+
 # Check if running with sudo privileges
 if [ "$EUID" -ne 0 ]; then
-    echo "This script needs to be run with sudo privileges."
+    echo -e "${YELLOW}This script needs to be run with sudo privileges.${RC}"
     read -p "Do you want to escalate? (y/n): " choice
-    if [ "$choice" == "y" ]; then
-        sudo "$0" "$@"  # Execute this script with sudo
+    if [ "$choice" = "y" ]; then
+        exec sudo "$0" "$@"  # Execute this script with sudo
     else
         echo "Script execution aborted."
         exit 1
     fi
 fi
 
-echo "Running with sudo privileges!"
+echo -e "${GREEN}Running with sudo privileges!${RC}"
 
-# Enviroment Checks
+# Check if running in WSL
+if ! grep -iq "microsoft" /proc/version; then
+    handle_error "This script is designed to run within WSL only."
+else
+    echo -e "${GREEN}WSL Detected.${RC}"
+fi
 
+# Environment Checks
 checkEnv() {
-    ## Check for requirements.
-    REQUIREMENTS='wget curl groups sudo'
-    if ! command_exists ${REQUIREMENTS}; then
-        echo -e "${RED}To run me, you need: ${REQUIREMENTS}${RC}"
-        exit 1
-    fi
+    # Check for required commands
+    REQUIREMENTS='wget curl groups'
+    for req in $REQUIREMENTS; do
+        if ! command_exists "$req"; then
+            handle_error "To run this script, you need: ${REQUIREMENTS}"
+        fi
+    done
 
-    ## Check Package Handeler
+    # Check for supported package manager
     PACKAGEMANAGER='apt yum dnf pacman zypper emerge xbps-install nix-env'
-    for pgm in ${PACKAGEMANAGER}; do
-        if command_exists ${pgm}; then
-            PACKAGER=${pgm}
-            echo -e "Using ${pgm}"
+    for pgm in $PACKAGEMANAGER; do
+        if command_exists "$pgm"; then
+            PACKAGER="$pgm"
+            echo -e "${GREEN}Using ${pgm} as package manager.${RC}"
+            break
         fi
     done
 
     if [ -z "${PACKAGER}" ]; then
-        echo -e "${RED}Can't find a supported package manager"
-        exit 1
+        handle_error "Can't find a supported package manager."
     fi
 
-    if command_exists sudo; then
-        SUDO_CMD="sudo"
-    elif command_exists doas && [ -f "/etc/doas.conf" ]; then
-        SUDO_CMD="doas"
-    else
-        SUDO_CMD="su -c"
-    fi
-
-    echo "Using ${SUDO_CMD} as privilege escalation software"
-    
-    ## Check if the current directory is writable.
+    # Check if the current directory is writable
     GITPATH="$(dirname "$(realpath "$0")")"
-    if [[ ! -w ${GITPATH} ]]; then
-        echo -e "${RED}Can't write to ${GITPATH}${RC}"
-        exit 1
+    if [ ! -w "${GITPATH}" ]; then
+        handle_error "Can't write to ${GITPATH}."
     fi
 
-    ## Check SuperUser Group
+    # Check SuperUser Group
     SUPERUSERGROUP='wheel sudo root'
-    for sug in ${SUPERUSERGROUP}; do
-        if groups | grep ${sug}; then
-            SUGROUP=${sug}
-            echo -e "Super user group ${SUGROUP}"
+    SUGROUP=""
+    for sug in $SUPERUSERGROUP; do
+        if groups | grep -q "${sug}"; then
+            SUGROUP="${sug}"
+            echo -e "${GREEN}Super user group: ${SUGROUP}.${RC}"
+            break
         fi
     done
 
-    ## Check if member of the sudo group.
-    if ! groups | grep ${SUGROUP} >/dev/null; then
-        echo -e "${RED}You need to be a member of the sudo group to run me!"
-        exit 1
+    # Ensure the user is a member of the superuser group
+    if [ -z "${SUGROUP}" ]; then
+        handle_error "You need to be a member of the ${SUPERUSERGROUP} group to run this script!"
     fi
-
 }
 
-# Installer for Nvidia Cuda Drivers for WSL2
+# Installer for NVIDIA CUDA Drivers for WSL2
+nvidia_installer() {
+    echo -e "${YELLOW}Fetching The Repos....${RC}"
+    wget https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-wsl-ubuntu.pin || handle_error "Failed to fetch repo."
+    
+    echo -e "${YELLOW}Adding The Repos to Sources List....${RC}"
+    mv cuda-wsl-ubuntu.pin /etc/apt/preferences.d/cuda-repository-pin-600 || handle_error "Failed to move repo file."
+    
+    echo -e "${YELLOW}Downloading NVIDIA CUDA 12.6 Installer...${RC}"
+    wget -q --show-progress https://developer.download.nvidia.com/compute/cuda/12.6.2/local_installers/cuda-repo-wsl-ubuntu-12-6-local_12.6.2-1_amd64.deb || handle_error "Failed to download CUDA installer."
+    
+    echo -e "${YELLOW}Installing NVIDIA CUDA 12.6....${RC}"
+    dpkg -i cuda-repo-wsl-ubuntu-12-6-local_12.6.2-1_amd64.deb || handle_error "Failed to install CUDA package."
+    
+    echo -e "${YELLOW}Adding CUDA Toolkit Repo to Sources List...${RC}"
+    cp /var/cuda-repo-wsl-ubuntu-12-6-local/cuda-*-keyring.gpg /usr/share/keyrings/ || handle_error "Failed to add keyring."
+    
+    echo -e "${YELLOW}Updating The Repos...${RC}"
+    apt-get update || handle_error "Failed to update repos."
+    
+    echo -e "${YELLOW}Installing NVIDIA CUDA Toolkit....${RC}"
+    apt-get -y install cuda-toolkit-12-6 || handle_error "Failed to install CUDA Toolkit."
+    
+    echo -e "${GREEN}NVIDIA CUDA Toolkit installed successfully!${RC}"
+}
 
-nvidia_installer() (
-
-	echo "Fetching The Repos...."
-	wget https://developer.download.nvidia.com/compute/cuda/repos/wsl-ubuntu/x86_64/cuda-wsl-ubuntu.pin
- 	echo " "
-	echo "Adding The Repos to Sources List...."
-	sudo mv cuda-wsl-ubuntu.pin /etc/apt/preferences.d/cuda-repository-pin-600
- 	echo " "
-	echo "Downloading NVIDIA Cuda 12.6 Installer"
-	wget -q --show-progress https://developer.download.nvidia.com/compute/cuda/12.6.2/local_installers/cuda-repo-wsl-ubuntu-12-6-local_12.6.2-1_amd64.deb
-	echo " "
-	echo "Installing NVIDIA Cuda 12.6...."
-	sudo dpkg -i cuda-repo-wsl-ubuntu-12-6-local_12.6.2-1_amd64.deb
-	echo " "
-	echo "Adding Cuda Toolkit Repo to Sources List..."
-	sudo cp /var/cuda-repo-wsl-ubuntu-12-6-local/cuda-*-keyring.gpg /usr/share/keyrings/
-	echo " "
-	echo "Updating The Repos..."
-	sudo apt-get update
-	echo "Done !"
-	echo " "
-	echo "Installing Nvidia Cuda Toolkit...."
-	sudo apt-get -y install cuda-toolkit-12-6
-	echo "Done !"
-)
+# Run environment checks and installer
+checkEnv
+nvidia_installer
