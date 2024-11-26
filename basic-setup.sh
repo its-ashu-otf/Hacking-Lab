@@ -27,22 +27,4 @@ wget -q --show-progress https://raw.githubusercontent.com/its-ashu-otf/Fix-my-Ka
 bash ./add-clipman.sh
 rm add-clipman.sh
 
-echo "Fixing Numlock..."
-wget -q --show-progress https://raw.githubusercontent.com/its-ashu-otf/Fix-my-Kali/main/numlockfix.sh
-chmod +x numlockfix.sh
-sudo ./numlockfix.sh
-rm numlockfix.sh
-
-echo "Fixing Snap Package Manager..."
-wget -q --show-progress https://raw.githubusercontent.com/its-ashu-otf/Fix-my-Kali/main/snapd_fixer.sh
-chmod +x snapd_fixer.sh
-sudo ./snapd_fixer.sh
-rm snapd_fixer.sh
-
-echo "Fixing MetaSploit APK Singing issues..."
-wget -q --show-progress https://raw.githubusercontent.com/its-hritika/Kali-Fix/main/metasploit_fix.sh
-chmod +x metasploit_fix.sh
-sudo ./metasploit_fix.sh
-rm metasploit_fix.sh
-
 echo "Done ! Reboot you're System to see the Changes..."
