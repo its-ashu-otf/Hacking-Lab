@@ -6,8 +6,13 @@ YELLOW='\033[33m'
 CYAN='\033[36m'
 GREEN='\033[32m'
 
+# Function to check if a command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Function to check if an escalation tool is available (sudo, doas)
 checkEscalationTool() {
-    ## Check for escalation tools.
     if [ -z "$ESCALATION_TOOL_CHECKED" ]; then
         if [ "$(id -u)" = "0" ]; then
             ESCALATION_TOOL="eval"
@@ -31,16 +36,8 @@ checkEscalationTool() {
     fi
 }
 
-command_exists() {
-for cmd in "$@"; do
-    export PATH="$HOME/.local/share/flatpak/exports/bin:/var/lib/flatpak/exports/bin:$PATH"
-    command -v "$cmd" >/dev/null 2>&1 || return 1
-done
-return 0
-}
-
+# Function to check if the current user has the required commands installed
 checkCommandRequirements() {
-    ## Check for requirements.
     REQUIREMENTS=$1
     for req in ${REQUIREMENTS}; do
         if ! command_exists "${req}"; then
@@ -50,8 +47,8 @@ checkCommandRequirements() {
     done
 }
 
+# Function to check the package manager
 checkPackageManager() {
-    ## Check Package Manager
     PACKAGEMANAGER=$1
     for pgm in ${PACKAGEMANAGER}; do
         if command_exists "${pgm}"; then
@@ -61,20 +58,14 @@ checkPackageManager() {
         fi
     done
 
-    ## Enable apk community packages
-    if [ "$PACKAGER" = "apk" ] && grep -qE '^#.*community' /etc/apk/repositories; then
-        "$ESCALATION_TOOL" sed -i '/community/s/^#//' /etc/apk/repositories
-        "$ESCALATION_TOOL" "$PACKAGER" update
-    fi
-
     if [ -z "$PACKAGER" ]; then
         printf "%b\n" "${RED}Can't find a supported package manager${RC}"
         exit 1
     fi
 }
 
+# Function to check if the user is in a superuser group
 checkSuperUser() {
-    ## Check SuperUser Group
     SUPERUSERGROUP='wheel sudo root'
     for sug in ${SUPERUSERGROUP}; do
         if groups | grep -q "${sug}"; then
@@ -84,15 +75,14 @@ checkSuperUser() {
         fi
     done
 
-    ## Check if member of the sudo group.
-    if ! groups | grep -q "${SUGROUP}"; then
+    if [ -z "$SUGROUP" ]; then
         printf "%b\n" "${RED}You need to be a member of the sudo group to run me!${RC}"
         exit 1
     fi
 }
 
+# Function to check if the current directory is writable
 checkCurrentDirectoryWritable() {
-    ## Check if the current directory is writable.
     GITPATH="$(dirname "$(realpath "$0")")"
     if [ ! -w "$GITPATH" ]; then
         printf "%b\n" "${RED}Can't write to $GITPATH${RC}"
@@ -100,15 +90,16 @@ checkCurrentDirectoryWritable() {
     fi
 }
 
+# Function to check the distribution
 checkDistro() {
-    DTYPE="unknown"  # Default to unknown
-    # Use /etc/os-release for modern distro identification
+    DTYPE="unknown"
     if [ -f /etc/os-release ]; then
         . /etc/os-release
         DTYPE=$ID
     fi
 }
 
+# Function to check if Flatpak is installed and configure it
 checkFlatpak() {
     if ! command_exists flatpak; then
         printf "%b\n" "${YELLOW}Installing Flatpak...${RC}"
@@ -136,15 +127,11 @@ checkFlatpak() {
     fi
 }
 
+# Function to configure Flatpak application symlinks and update the desktop environment
 configure_flatpak() {
-    # Define colors
-    local YELLOW="\033[1;33m"
-    local RC="\033[0m"  # Reset color
-
-    # Output a message for symbolic link creation
     printf "%b\n" "${YELLOW}Making Symbolic link to Flatpak Packages...${RC}"
 
-    # Create symbolic links for Flatpak applications and icons
+    # Create symlinks for Flatpak applications and icons if not already linked
     if [ ! -L /usr/share/applications/flatpak ]; then
         "$ESCALATION_TOOL" ln -s /var/lib/flatpak/exports/share/applications /usr/share/applications/flatpak
     else
@@ -162,13 +149,22 @@ configure_flatpak() {
     if "$ESCALATION_TOOL" update-desktop-database; then
         printf "%b\n" "${YELLOW}Desktop Database updated successfully!${RC}"
     else
-        printf "%b\n" "${YELLOW}Failed to update Desktop Database.${RC}"
+        printf "%b\n" "${RED}Failed to update Desktop Database.${RC}"
     fi
 
     # Add Flatpak directories to XDG_DATA_DIRS
     printf "%b\n" "${YELLOW}Adding Flatpak directories to XDG_DATA_DIRS...${RC}"
     export XDG_DATA_DIRS="$XDG_DATA_DIRS:/var/lib/flatpak/exports/share:/home/ashu/.local/share/flatpak/exports/share"
 
-    # Provide feedback that the function completed
+    # Final confirmation
     printf "%b\n" "${YELLOW}Configuration complete! Flatpak applications should now appear in the menu.${RC}"
 }
+
+# Main execution starts here
+
+checkEscalationTool
+checkCommandRequirements "flatpak ln"
+checkPackageManager "apt pacman apk"
+checkSuperUser
+checkFlatpak
+configure_flatpak
